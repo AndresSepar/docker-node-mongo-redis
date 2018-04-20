@@ -1,17 +1,18 @@
 # Node, Mongo, Redis, Nginx
 # Minh Chu <scsilver94@gmail.com>
+# Andres Separ <andres.separ@gmail.com>
 
 version: "2"
 services:
   api:
-    image: node:boron
+    image: node:latest
     depends_on:
       - mongodb
       - redis
     volumes:
       - ./api:/home/node/api/
     working_dir: /home/node/api
-    command: yarn start
+    command: npm install
     networks:
       - backend
     logging:
@@ -21,7 +22,7 @@ services:
         max-file: "3"
 
   mongodb:
-    image: mongo:3.0
+    image: mongo:latest
     volumes:
       - mongodb:/data/db/
     networks:
@@ -33,7 +34,7 @@ services:
         max-file: "3"
 
   redis:
-    image: redis:3.2-alpine
+    image: redis:latest
     networks:
       - backend
     volumes:
@@ -45,13 +46,14 @@ services:
         max-file: "3"
 
   nginx:
-    image: nginx:stable-alpine
+    image: nginx:latest
     depends_on:
       - api
     networks:
       - backend
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./public:/usr/share/nginx/html:ro
     ports:
       - "80:80"
       - "443:443"

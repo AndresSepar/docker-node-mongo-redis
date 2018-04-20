@@ -12,7 +12,7 @@ services:
     volumes:
       - ./api:/home/node/api/
     working_dir: /home/node/api
-    command: npm install
+    command: yarn start
     networks:
       - backend
     logging:

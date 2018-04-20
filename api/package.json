@@ -9,6 +9,6 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "restify": "^6.2.3"
+    "restify": "^7.1.1"
   }
 }

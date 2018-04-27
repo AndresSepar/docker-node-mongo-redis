@@ -6,6 +6,7 @@ version: "2"
 services:
   api:
     image: node:latest
+    restart: always
     depends_on:
       - mongodb
       - redis
@@ -21,10 +22,73 @@ services:
         max-size: "100MB"
         max-file: "3"
 
-  mongodb:
+  mongo3:
+    hostname: mongo3
     image: mongo:latest
     volumes:
-      - mongodb:/data/db/
+      - mongodb/data:/data/db/
+    entrypoint: [ "/usr/bin/mongod", "--replSet", "rs", "--journal", "--smallfiles", "--rest" ]
+    ports:
+      - "27019:27017"
+      - "28019:28017"
+    restart: always
+    networks:
+      - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100MB"
+        max-file: "3"
+
+  mongo2:
+    hostname: mongo2
+    image: mongo:latest
+    volumes:
+      - mongodb/data:/data/db/
+    entrypoint: [ "/usr/bin/mongod", "--replSet", "rs", "--journal", "--smallfiles", "--rest" ]
+    ports:
+      - "27018:27017"
+      - "28018:28017"
+    restart: always
+    networks:
+      - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100MB"
+        max-file: "3"
+
+  mongo1:
+    hostname: mongo1
+    image: mongo:latest
+    volumes:
+      - mongodb/data:/data/db/
+    entrypoint: [ "/usr/bin/mongod", "--replSet", "rs", "--journal", "--smallfiles", "--rest" ]
+    ports:
+      - "27017:27017"
+      - "28017:28017"
+    links:
+      - mongo2:mongo2
+      - mongo3:mongo3
+    restart: always
+    networks:
+      - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100MB"
+        max-file: "3"
+
+  mongosetup:
+    image: mongo:latest
+    links:
+      - mongo1:mongo1
+      - mongo2:mongo2
+      - mongo3:mongo3
+    volumes:
+      - mongodb/replicaset.sh:/replicaset.sh
+    entrypoint: [ "replicaset.sh" ]
+    restart: always
     networks:
       - backend
     logging:
@@ -35,6 +99,7 @@ services:
 
   redis:
     image: redis:latest
+    restart: always
     networks:
       - backend
     volumes:
@@ -47,13 +112,13 @@ services:
 
   nginx:
     image: nginx:latest
+    restart: always
     depends_on:
       - api
     networks:
       - backend
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./public:/usr/share/nginx/html:ro
     ports:
       - "80:80"
       - "443:443"

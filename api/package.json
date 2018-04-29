@@ -9,6 +9,7 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "restify": "^7.1.1"
+    "restify": "^7.1.1",
+    "mongoose": "5.0.16"
   }
 }

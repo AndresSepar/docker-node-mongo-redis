@@ -5,10 +5,11 @@
 version: "2"
 services:
   api:
+    container_name: api
     image: node:latest
     restart: always
     depends_on:
-      - mongodb
+      - mongosetup
       - redis
     volumes:
       - ./api:/home/node/api/
@@ -23,11 +24,10 @@ services:
         max-file: "3"
 
   mongo3:
+    container_name: mongo3
     hostname: mongo3
     image: mongo:latest
-    volumes:
-      - mongodb/data:/data/db/
-    entrypoint: [ "/usr/bin/mongod", "--replSet", "rs", "--journal", "--smallfiles", "--rest" ]
+    entrypoint: [ "/usr/bin/mongod", "--replSet", "rs", "--journal", "--smallfiles" ]
     ports:
       - "27019:27017"
       - "28019:28017"
@@ -41,11 +41,10 @@ services:
         max-file: "3"
 
   mongo2:
+    container_name: mongo2
     hostname: mongo2
     image: mongo:latest
-    volumes:
-      - mongodb/data:/data/db/
-    entrypoint: [ "/usr/bin/mongod", "--replSet", "rs", "--journal", "--smallfiles", "--rest" ]
+    entrypoint: [ "/usr/bin/mongod", "--replSet", "rs", "--journal", "--smallfiles" ]
     ports:
       - "27018:27017"
       - "28018:28017"
@@ -59,17 +58,13 @@ services:
         max-file: "3"
 
   mongo1:
+    container_name: mongo1
     hostname: mongo1
     image: mongo:latest
-    volumes:
-      - mongodb/data:/data/db/
-    entrypoint: [ "/usr/bin/mongod", "--replSet", "rs", "--journal", "--smallfiles", "--rest" ]
+    entrypoint: [ "/usr/bin/mongod", "--replSet", "rs", "--journal", "--smallfiles" ]
     ports:
       - "27017:27017"
       - "28017:28017"
-    links:
-      - mongo2:mongo2
-      - mongo3:mongo3
     restart: always
     networks:
       - backend
@@ -80,15 +75,15 @@ services:
         max-file: "3"
 
   mongosetup:
+    container_name: mongo
     image: mongo:latest
-    links:
-      - mongo1:mongo1
-      - mongo2:mongo2
-      - mongo3:mongo3
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
     volumes:
-      - mongodb/replicaset.sh:/replicaset.sh
-    entrypoint: [ "replicaset.sh" ]
-    restart: always
+      - ./mongodb/scripts:/scripts
+    entrypoint: [ "sh", "/scripts/replicaset.sh" ]
     networks:
       - backend
     logging:
@@ -98,6 +93,7 @@ services:
         max-file: "3"
 
   redis:
+    container_name: redis
     image: redis:latest
     restart: always
     networks:
@@ -111,6 +107,7 @@ services:
         max-file: "3"
 
   nginx:
+    container_name: nginx
     image: nginx:latest
     restart: always
     depends_on:
@@ -130,6 +127,7 @@ services:
 
 networks:
   backend:
+    driver: bridge
 
 volumes:
   mongodb:

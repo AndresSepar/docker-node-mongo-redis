@@ -16,7 +16,7 @@ if [ $? -eq 1 ]; then
   echo >&2 "NodeJS not found."
   echo "Installing NodeJS in your machine..."
   curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
-  sudo apt-get update && sudo apt-get install -y nodejs
+  sudo apt update && sudo apt install -y nodejs
 fi
 
 hash yarn &> /dev/null
@@ -25,7 +25,7 @@ if [ $? -eq 1 ]; then
   echo "Installing Yarn in your machine..."
   curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
   echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
-  sudo apt-get update && sudo apt-get install yarn
+  sudo apt update && sudo apt install -y yarn
 fi
 
 cd api/
@@ -40,7 +40,7 @@ echo "or leave them empty to install everything"
 echo "> api"
 echo "> nginx"
 echo "> redis"
-echo "> mongo"
+echo "> mongosetup"
 
 read CONTAINERS
 
